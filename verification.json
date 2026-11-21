@@ -1,0 +1,62 @@
+{
+  "network": "BSC Testnet",
+  "chainId": 97,
+  "checks": [
+    {
+      "name": "worker balance increased by exactly the reward",
+      "ok": true,
+      "detail": "worker 0.0 -> 100.0 mUSDC"
+    },
+    {
+      "name": "poster balance decreased by exactly the reward",
+      "ok": true,
+      "detail": "poster 10000.0 -> 9900.0 mUSDC"
+    },
+    {
+      "name": "job A status is Completed",
+      "ok": true,
+      "detail": "status=3"
+    },
+    {
+      "name": "acceptJob without Agent ID reverts",
+      "ok": true
+    },
+    {
+      "name": "stranger indeed holds 0 Agent ID",
+      "ok": true,
+      "detail": "balanceOf=0"
+    },
+    {
+      "name": "poster balance restored by exactly the reward after refund",
+      "ok": true,
+      "detail": "poster 9840.0 -> 9890.0 mUSDC"
+    },
+    {
+      "name": "job C status is Refunded",
+      "ok": true,
+      "detail": "status=4"
+    }
+  ],
+  "jobA": {
+    "jobId": "0",
+    "txs": {
+      "post": "0x9adac11bc262341f010c233ea3bf31fa739d7cd2b0184cc84843e31db8deb028",
+      "accept": "0x1d69eb99ea3b0335c8891307230e3932fefa6642672b1d3c363bab308bccf3cc",
+      "deliver": "0x3883ea9f32b331dc088f647193e1e8982f37013e89040e02fa01ec2d56eb8c31",
+      "acceptDelivery": "0x5291dbfe7f972b02a44b2d3d2db51265a7fb84902f93577fa20938fb9d642e1b"
+    }
+  },
+  "jobNeg": {
+    "jobId": "1",
+    "postTx": "0x2c231324e3ff25bfc842b49a6289035f1c2c0239915dca1203a4aa2c9d1e7e26"
+  },
+  "jobRefund": {
+    "jobId": "2",
+    "txs": {
+      "post": "0x921b3dfcc06e1b3cbee810b4d98c7cbd7c86f649b276953894a4bcdd88cec0be",
+      "refund": "0xa4ce1eebeb1ad9ab3030fc8960d0ca30b733689eec6b86df8edd296e9a39f5e9"
+    }
+  },
+  "allPassed": true,
+  "verifiedAt": "2026-11-21T02:13:23.045Z"
+}

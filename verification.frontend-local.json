@@ -1,0 +1,118 @@
+{
+  "network": "Local Hardhat node (dry run)",
+  "chainId": 31337,
+  "checks": [
+    {
+      "name": "worker holds an Agent ID (page shows 持有)",
+      "ok": true
+    },
+    {
+      "name": "poster holds no Agent ID",
+      "ok": true
+    },
+    {
+      "name": "stranger holds no Agent ID",
+      "ok": true
+    },
+    {
+      "name": "job list reads via nextJobId + getJob",
+      "ok": true
+    },
+    {
+      "name": "frontend gating allows the worker to accept",
+      "ok": true
+    },
+    {
+      "name": "frontend gating blocks a non-holder with a reason",
+      "ok": true
+    },
+    {
+      "name": "frontend gating blocks the poster accepting their own job",
+      "ok": true
+    },
+    {
+      "name": "worker balance increased by exactly the reward",
+      "ok": true,
+      "detail": "worker 0.0 -> 100.0 mUSDC"
+    },
+    {
+      "name": "poster balance decreased by exactly the reward",
+      "ok": true,
+      "detail": "poster 10000.0 -> 9900.0 mUSDC"
+    },
+    {
+      "name": "job A status text is 已完成",
+      "ok": true
+    },
+    {
+      "name": "after reject, status is back to InProgress (进行中)",
+      "ok": true
+    },
+    {
+      "name": "after reject, delivery is cleared",
+      "ok": true
+    },
+    {
+      "name": "resubmitted delivery is accepted and worker is paid",
+      "ok": true
+    },
+    {
+      "name": "acceptJob without Agent ID reverts",
+      "ok": true
+    },
+    {
+      "name": "cancelled job status text is 已取消",
+      "ok": true
+    },
+    {
+      "name": "cancel refunds the poster exactly the reward",
+      "ok": true
+    },
+    {
+      "name": "before deadline the page does NOT show refundable",
+      "ok": true
+    },
+    {
+      "name": "after deadline the page shows refundable",
+      "ok": true
+    },
+    {
+      "name": "poster balance restored by exactly the reward after refund",
+      "ok": true,
+      "detail": "poster 9740.0 -> 9790.0 mUSDC"
+    },
+    {
+      "name": "refunded job status text is 已退款",
+      "ok": true
+    },
+    {
+      "name": "job list grew and still reads after the flow",
+      "ok": true,
+      "detail": "0 -> 5 jobs"
+    }
+  ],
+  "jobA": {
+    "jobId": "0",
+    "txs": {
+      "post": "0x038e723f7d93a6f714f525d811a9305f62a4ecd7641f231f32fd5593054f0d10",
+      "accept": "0xa84e15b925066dcb03f8847e6257fa149107bbe5187e614e7ef3b393d11c2d21",
+      "deliver": "0x734d4e839ffb548d01a48a332345a4a92856723d4f414e7eb20b1b27f99a3d7b",
+      "acceptDelivery": "0x601c5db4c05f9eda676eae5f0281bddd96d69a87d26e080977d912d5e5bfb017"
+    }
+  },
+  "jobReject": {
+    "jobId": "1"
+  },
+  "jobCancel": {
+    "jobId": "3"
+  },
+  "jobRefund": {
+    "jobId": "4",
+    "txs": {
+      "post": "0x4547d70529821e1ff947008f2a099032e408c1e2412277dc5ad10fd2d2be5846",
+      "refund": "0xfd36b1165560b56d3c03bb380daed29871444c2b5a4f2f71c5b71578161b3a48"
+    }
+  },
+  "allPassed": true,
+  "verifiedAt": "2026-11-21T14:07:31.512Z"
+}

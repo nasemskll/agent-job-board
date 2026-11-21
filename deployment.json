@@ -1,0 +1,17 @@
+{
+  "network": "BSC Testnet",
+  "chainId": 97,
+  "rpc": "https://data-seed-prebsc-1-s1.binance.org:8545/",
+  "explorer": "https://testnet.bscscan.com",
+  "deployer": "0xD8ebd6a925E208937e5F659B2ebf9588b78B23f0",
+  "poster": "0xC662a07Da6cE485b8bbD6A1d8e07F433a672D564",
+  "worker": "0xACac3329cFb1b7393dDd5EeD77CE8739F48cADf9",
+  "contracts": {
+    "MockUSDC": "0xAc575B03E5774a946d86F5476D2A0cec7E5D0a06",
+    "MockAgentID": "0x35eF9EFBA3162812e8553ba2f0A8C716b071faA7",
+    "AgentJobBoard": "0x64F25291af60ccF1c155282f558B50FeCC9E8daf"
+  },
+  "productionAgentId": "0x60b9262456de011f7d15a54cdd8c48baaa8b022f",
+  "notes": "MockUSDC/MockAgentID are testnet-only stand-ins. Mainnet: real USDC + production Agent ID above.",
+  "deployedAt": "2026-11-21T02:11:16.570Z"
+}

@@ -1,0 +1,59 @@
+{
+  "network": "Local Hardhat node (dry run)",
+  "chainId": 31337,
+  "checks": [
+    {
+      "name": "worker balance increased by exactly the reward",
+      "ok": true,
+      "detail": "worker 200.0 -> 300.0 mUSDC"
+    },
+    {
+      "name": "poster balance decreased by exactly the reward",
+      "ok": true,
+      "detail": "poster 9780.0 -> 9680.0 mUSDC"
+    },
+    {
+      "name": "job A status is Completed",
+      "ok": true
+    },
+    {
+      "name": "acceptJob without Agent ID reverts",
+      "ok": true
+    },
+    {
+      "name": "stranger indeed holds 0 Agent ID",
+      "ok": true
+    },
+    {
+      "name": "poster balance restored by exactly the reward after refund",
+      "ok": true,
+      "detail": "poster 9620.0 -> 9670.0 mUSDC"
+    },
+    {
+      "name": "job C status is Refunded",
+      "ok": true
+    }
+  ],
+  "jobA": {
+    "jobId": "5",
+    "txs": {
+      "post": "0x9e27b50fc552ad20258edf07bdfbe85c8d110984d5ed5e472e81ec0d25d7f141",
+      "accept": "0x4c368d0655cb0818e121c31f769c9b4de07ca7a87d82be4e873a7843fd51850d",
+      "deliver": "0x2f56cb623a286ffbc4371c21d457edb99284b128faa64bcb05287ae694d08a0a",
+      "acceptDelivery": "0xc1b2bbfdbd4400e2b0043f87ca3817fc059267b57b2255a125cea4ce926c4a45"
+    }
+  },
+  "jobNeg": {
+    "jobId": "6",
+    "postTx": "0x2c1ab745f88f1d6b61487f9d551dae51e4fb9c4c5b08c5e17a63b91e81b0d5a8"
+  },
+  "jobRefund": {
+    "jobId": "7",
+    "txs": {
+      "post": "0xcc9d3ac9e543c374aba5cb528f20266b501a8a1f242aa05ea22d18aa2de1ddd4",
+      "refund": "0xc35062ece4a72a66bba9380b19ed44559b1c550cbd8d8e09db04490baea7cb18"
+    }
+  },
+  "allPassed": true,
+  "verifiedAt": "2026-11-21T01:16:18.796Z"
+}
