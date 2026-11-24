@@ -37,6 +37,10 @@
       97: {
         label: "BSC 测试网（97）",
         rpc: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+        rpcs: [
+          "https://data-seed-prebsc-1-s1.binance.org:8545/",
+          "https://data-seed-prebsc-2-s1.binance.org:8545/",
+        ],
         explorer: "https://testnet.bscscan.com",
         tokenDecimals: 6,
         tokenSymbol: "mUSDC",
@@ -50,6 +54,12 @@
       56: {
         label: "BSC 主网（56）",
         rpc: "https://bsc-dataseed.binance.org/",
+        // 只读模式的公共 RPC 备选：主节点限流/不可达时依次尝试。
+        rpcs: [
+          "https://bsc-dataseed.binance.org/",
+          "https://bsc-dataseed1.bnbchain.org/",
+          "https://bsc-dataseed1.defibit.io/",
+        ],
         explorer: "https://bscscan.com",
         // 主网支付代币是 Binance-Peg USDC（18 位小数），不是 6 位！
         // 前端按此处的 tokenDecimals 解析/展示金额，勿改回 6。

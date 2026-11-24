@@ -14,6 +14,12 @@
   var board = null;
   var usdc = null;
   var agentId = null;
+  // 只读公开读取（无需钱包）：公共 BSC RPC + 合约直读。
+  // 招募页的死结正在这里——Agentic Wallet 连不上网页，常规钱包又接不了
+  // Agent ID 的单；陌生人至少要能先看到任务列表。
+  var readProvider = null;
+  var readBoard = null;
+  var readChainId = 56; // 只读模式当前查看的网络，默认 BSC 主网
   var holdsAgentId = false;
   var jobsCache = [];
   var cancelledIds = new Set();
@@ -66,8 +72,47 @@
     }
   }
 
+  // 只读模式当前可用的 provider（钱包优先，只读兜底）。
+  function activeProvider() { return provider || readProvider; }
+
+  // 当前网络的公共 RPC 列表（config.js 的 rpcs；没有就用单个 rpc）。
+  function rpcListFor(net) {
+    if (net && net.rpcs && net.rpcs.length) return net.rpcs.slice();
+    return [net.rpc];
+  }
+
+  // 只读初始化：用公共 RPC 直连合约读任务列表，不需要钱包。
+  // 依次试 RPC 列表，拨通（getNetwork 且 chainId 相符）才算可用。
+  async function initReadOnly(chainIdNum) {
+    var cfg = CFG.configForChain(chainIdNum);
+    if (!cfg) {
+      jobsCache = [];
+      $("jobList").innerHTML = "<p>不支持的网络（chainId " + esc(String(chainIdNum)) + "）。</p>";
+      return;
+    }
+    var rpcs = rpcListFor(cfg);
+    var lastErr = null;
+    for (var k = 0; k < rpcs.length; k++) {
+      try {
+        var rp = new ethers.JsonRpcProvider(rpcs[k]);
+        var net = await rp.getNetwork();
+        if (Number(net.chainId) !== Number(chainIdNum)) throw new Error("RPC 返回的 chainId 不符");
+        readProvider = rp;
+        readBoard = new ethers.Contract(cfg.contracts.AgentJobBoard, window.APP_ABI.board, readProvider);
+        board = readBoard;
+        readChainId = Number(chainIdNum);
+        chainId = Number(chainIdNum);
+        netConfig = cfg;
+        renderWallet();
+        await loadJobs();
+        return;
+      } catch (e) { lastErr = e; }
+    }
+    setStatus("只读读取失败（公共 RPC 不可达）：" + shortErr(lastErr), true);
+  }
+
   async function refresh() {
-    if (!provider) return;
+    if (!provider) { await initReadOnly(readChainId); return; }
     try {
       var net = await provider.getNetwork();
       chainId = Number(net.chainId);
@@ -133,28 +178,51 @@
   }
 
   async function loadJobs() {
+    if (!board) { setStatus("尚未选择网络。", true); return; }
     var total = Number(await board.nextJobId());
     var list = [];
+    var box = $("jobList");
+    // 逐个读：公共 RPC 对批量 eth_call 限流（33 个并行会直接报
+    // rate limit），串行反而稳；实测 33 个任务约 3 秒，带进度提示。
     for (var i = 0; i < total; i++) {
-      var j = await board.getJob(i);
+      var j = null;
+      for (var attempt = 0; attempt < 2 && !j; attempt++) {
+        try { j = await board.getJob(i); }
+        catch (e) {
+          if (attempt === 0) await new Promise(function (r) { setTimeout(r, 500); });
+        }
+      }
+      if (!j) { setStatus("读取任务 #" + i + " 失败，请稍后点“刷新任务列表”重试。", true); return; }
       list.push({
         id: i, poster: j.poster, worker: j.worker,
         reward: j.reward, reviewDeadline: j.reviewDeadline,
         title: j.title, description: j.description,
         delivery: j.delivery, status: Number(j.status),
       });
+      if ((i + 1) % 5 === 0 || i === total - 1) {
+        box.innerHTML = "<p>正在从链上读取任务 " + (i + 1) + "/" + total + "…</p>";
+      }
     }
     // 区分“已取消”与“已退款”：cancelJob 也是状态 4，需查 JobCancelled 事件。
+    // 公共 RPC 不支持从 0 号区块查全量日志，大多会失败并进 catch；
+    // 失败时已取消会显示为已退款，不影响资金逻辑。
     cancelledIds = new Set();
     try {
       var evs = await board.queryFilter(board.filters.JobCancelled());
       evs.forEach(function (ev) { cancelledIds.add(String(ev.args.jobId)); });
     } catch (e) { /* 事件查不到时，已取消会显示为已退款，不影响资金逻辑 */ }
     jobsCache = list.reverse(); // 新任务在前
-    try { chainNowSec = (await provider.getBlock("latest")).timestamp; } catch (e) { chainNowSec = null; }
+    var ap = activeProvider();
+    try { chainNowSec = (await ap.getBlock("latest")).timestamp; } catch (e) { chainNowSec = null; }
     renderJobs();
-    $("networkHint").textContent = "已连接 " + netConfig.label +
-      "，合约 " + netConfig.contracts.AgentJobBoard;
+    if (account) {
+      $("networkHint").textContent = "已连接 " + netConfig.label +
+        "，合约 " + netConfig.contracts.AgentJobBoard;
+    } else {
+      $("networkHint").textContent = "只读模式：正在查看 " + netConfig.label +
+        " 的任务列表（公共 RPC，无需连接钱包），合约 " + netConfig.contracts.AgentJobBoard +
+        "。发单、接单、交付、验收等操作需要连接钱包。";
+    }
   }
 
   function renderJobs() {
@@ -342,6 +410,13 @@
         blockExplorerUrls: ["https://bscscan.com"],
       });
     });
+    var sel = $("readNetSelect");
+    if (sel) {
+      sel.addEventListener("change", function () { initReadOnly(Number(sel.value)); });
+    }
+    // 任务列表默认只读公开加载（BSC 主网）：不连钱包也能看。
+    // 有钱包且已授权时，下面再走钱包流程补余额与持有状态。
+    initReadOnly(readChainId);
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", function (accs) {
         account = accs[0] || null; refresh();
@@ -355,7 +430,6 @@
       }).catch(function () { renderWallet(); });
     } else {
       renderWallet();
-      $("networkHint").textContent = "未检测到钱包：请安装 MetaMask 或 Binance Wallet 后刷新页面。";
     }
   });
 })();
